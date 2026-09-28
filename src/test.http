@@ -1,0 +1,8 @@
+POST http://localhost:8080/api/documents/save
+Content-Type: application/json
+
+{
+  "title": "Sample Legal Agreement",
+  "fileName": "sample.txt",
+  "content": "This is a sample legal document for testing the Legal Document Analysis system."
+}

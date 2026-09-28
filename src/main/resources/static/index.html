@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Legal Document Analysis</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .upload-section {
+            padding: 20px;
+            border: 2px dashed #aaa;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        input[type="file"] {
+            margin: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #2563eb;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .result {
+            margin-top: 30px;
+        }
+
+        .result-box {
+            background: #f8fafc;
+            border-left: 5px solid #2563eb;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+
+        .label {
+            font-weight: bold;
+        }
+
+        #riskLevel {
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+            color: #555;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Legal Document Analysis</h1>
+
+    <p class="subtitle">
+        Upload a legal document to analyze its potential risks using AI.
+    </p>
+
+    <div class="upload-section">
+
+        <input type="file" id="fileInput" accept=".pdf,.txt">
+
+        <br>
+
+        <button onclick="uploadDocument()">
+            Upload & Analyze
+        </button>
+
+    </div>
+
+    <div class="loading" id="loading">
+        Analyzing document... Please wait.
+    </div>
+
+    <div class="result">
+
+        <h2>Analysis Result</h2>
+
+        <div class="result-box">
+            <p>
+                <span class="label">Document ID:</span>
+                <span id="documentId">-</span>
+            </p>
+
+            <p>
+                <span class="label">Risk Level:</span>
+                <span id="riskLevel">-</span>
+            </p>
+        </div>
+
+        <div class="result-box">
+            <p class="label">Summary</p>
+            <p id="summary">-</p>
+        </div>
+
+        <div class="result-box">
+            <p class="label">Risk Details</p>
+            <p id="riskDetails">-</p>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    async function uploadDocument() {
+
+        const fileInput = document.getElementById("fileInput");
+        const loading = document.getElementById("loading");
+
+        if (!fileInput.files.length) {
+            alert("Please select a file first.");
+            return;
+        }
+
+        const formData = new FormData();
+
+        formData.append("file", fileInput.files[0]);
+
+        try {
+
+            loading.style.display = "block";
+
+            // Upload document
+            const uploadResponse = await fetch(
+                "/api/documents/upload",
+                {
+                    method: "POST",
+                    body: formData
+                }
+            );
+
+            if (!uploadResponse.ok) {
+                throw new Error("Document upload failed");
+            }
+
+            const uploadedDocument =
+                await uploadResponse.json();
+
+            document.getElementById("documentId").textContent =
+                uploadedDocument.id;
+
+
+            // AI analysis
+            const analysisResponse = await fetch(
+                "/api/analysis/ai-analyze/" +
+                uploadedDocument.id,
+                {
+                    method: "POST"
+                }
+            );
+
+            if (!analysisResponse.ok) {
+                throw new Error("Document analysis failed");
+            }
+
+            const analysis =
+                await analysisResponse.json();
+
+
+            // Display result
+            document.getElementById("riskLevel").textContent =
+                analysis.riskLevel;
+
+            document.getElementById("summary").textContent =
+                analysis.summary;
+
+            document.getElementById("riskDetails").textContent =
+                analysis.riskDetails;
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert(
+                "Something went wrong: " +
+                error.message
+            );
+
+        } finally {
+
+            loading.style.display = "none";
+        }
+    }
+
+</script>
+
+</body>
+</html>
