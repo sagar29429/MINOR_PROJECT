@@ -3,6 +3,8 @@ package com.legal.legaldocumentanalysis.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+//import jakarta.persistence.Column;
+
 @Entity
 @Table(name = "legal_documents")
 public class LegalDocument {
@@ -61,5 +63,16 @@ public class LegalDocument {
 
     public void setUploadedDate(LocalDateTime uploadedDate) {
         this.uploadedDate = uploadedDate;
+    }
+
+    @Column(name = "file_hash", length = 64, unique = true)
+    private String fileHash;
+
+    public String getFileHash() {
+        return fileHash;
+    }
+
+    public void setFileHash(String fileHash) {
+        this.fileHash = fileHash;
     }
 }

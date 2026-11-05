@@ -1,232 +1,1025 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Legal Document Analysis</title>
+    <title>Legal Intelligence Workspace</title>
 
     <style>
+        :root {
+            --bg: #f5f7fb;
+            --panel: #ffffff;
+            --ink: #172033;
+            --muted: #667085;
+            --line: #e4e8f0;
+            --brand: #315efb;
+            --brand-dark: #2348d8;
+            --success: #147d54;
+            --warning: #a15c00;
+            --danger: #b42318;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
             margin: 0;
-            padding: 40px;
+            color: var(--ink);
+            background: var(--bg);
+            font-family: Inter, "Segoe UI", Arial, sans-serif;
+            line-height: 1.6;
         }
 
-        .container {
-            max-width: 900px;
+        button, input, textarea { font: inherit; }
+        button { cursor: pointer; }
+        button:disabled { opacity: .6; cursor: not-allowed; }
+
+        .app-shell {
+            max-width: 1500px;
             margin: auto;
+            padding: 22px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .brand-lockup {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+        }
+
+        .brand-mark {
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            color: white;
+            background: linear-gradient(135deg, #315efb, #7795ff);
+            border-radius: 14px;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .brand-title {
+            margin: 0;
+            font-size: 21px;
+            letter-spacing: -.4px;
+        }
+
+        .brand-subtitle {
+            margin: 3px 0 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .topbar-pill {
+            padding: 8px 13px;
+            border: 1px solid var(--line);
+            border-radius: 30px;
             background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            color: #475467;
+            font-size: 12px;
+            white-space: nowrap;
         }
 
-        h1 {
-            text-align: center;
-            margin-bottom: 10px;
+        .status-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            margin-right: 6px;
+            border-radius: 50%;
+            background: #18a66a;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
+        .page-grid {
+            display: grid;
+            grid-template-columns: minmax(280px, 350px) minmax(0, 1fr);
+            gap: 22px;
+            align-items: start;
         }
 
-        .upload-section {
-            padding: 20px;
-            border: 2px dashed #aaa;
-            border-radius: 8px;
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            min-width: 0;
+        }
+
+        .panel {
+            min-width: 0;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            box-shadow: 0 12px 35px rgba(20, 33, 61, .06);
+        }
+
+        .upload-card, .analysis-card { padding: 22px; }
+
+        .eyebrow {
+            margin-bottom: 7px;
+            color: var(--brand);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 19px;
+            letter-spacing: -.3px;
+        }
+
+        .muted { color: var(--muted); }
+
+        .upload-drop {
+            margin-top: 17px;
+            padding: 22px 14px;
+            border: 1.5px dashed #b9c7e7;
+            border-radius: 14px;
+            background: #f8faff;
             text-align: center;
         }
+
+        .upload-icon {
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 10px;
+            border-radius: 13px;
+            background: #edf2ff;
+            color: var(--brand);
+            font-size: 23px;
+        }
+
+        .upload-drop strong { display: block; font-size: 14px; }
+        .upload-drop p { color: var(--muted); font-size: 12px; }
 
         input[type="file"] {
-            margin: 15px;
+            width: 100%;
+            max-width: 100%;
+            margin: 10px 0 13px;
+            font-size: 12px;
         }
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 6px;
-            background: #2563eb;
+        .primary-btn, .secondary-btn, .suggestion-button, .icon-btn {
+            border-radius: 10px;
+            transition: background .15s ease;
+        }
+
+        .primary-btn {
+            padding: 11px 16px;
+            border: 1px solid var(--brand);
+            background: var(--brand);
             color: white;
-            cursor: pointer;
-            font-size: 15px;
+            font-size: 14px;
+            font-weight: 700;
         }
 
-        button:hover {
-            background: #1d4ed8;
+        .primary-btn:hover { background: var(--brand-dark); }
+
+        .secondary-btn {
+            padding: 9px 12px;
+            border: 1px solid var(--line);
+            background: white;
+            color: #344054;
+            font-size: 12px;
+            font-weight: 650;
         }
 
-        .result {
-            margin-top: 30px;
-        }
+        .secondary-btn:hover { background: #f3f6fc; }
+        .full-width { width: 100%; }
 
-        .result-box {
-            background: #f8fafc;
-            border-left: 5px solid #2563eb;
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 5px;
-        }
-
-        .label {
-            font-weight: bold;
-        }
-
-        #riskLevel {
-            font-weight: bold;
-            font-size: 18px;
+        .file-note, .disclaimer {
+            color: #98a2b3;
+            font-size: 11px;
+            line-height: 1.6;
         }
 
         .loading {
             display: none;
-            margin-top: 20px;
-            text-align: center;
-            color: #555;
+            margin-top: 14px;
+            color: var(--brand);
+            font-size: 12px;
+        }
+
+        .document-meta {
+            margin-top: 16px;
+            padding: 13px;
+            border: 1px solid #e9eefb;
+            border-radius: 12px;
+            background: #f8faff;
+        }
+
+        .meta-label {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .7px;
+            text-transform: uppercase;
+        }
+
+        .meta-value {
+            display: block;
+            margin-top: 3px;
+            font-size: 13px;
+            font-weight: 650;
+            overflow-wrap: anywhere;
+        }
+
+        .risk-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 17px 0;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: #eef2f6;
+            color: #475467;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .risk-low { background: #e8f7ef; color: var(--success); }
+        .risk-medium { background: #fff3db; color: var(--warning); }
+        .risk-high { background: #feeceb; color: var(--danger); }
+
+        .analysis-block {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--line);
+        }
+
+        .analysis-block h3 {
+            margin: 0 0 7px;
+            color: #475467;
+            font-size: 12px;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+        .analysis-block p {
+            margin: 0;
+            color: #344054;
+            font-size: 13px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        /* Large ChatGPT-style conversation panel */
+        .chat-panel {
+            display: flex;
+            flex-direction: column;
+            height: min(86vh, 1050px);
+            min-height: 700px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--line);
+            background: white;
+        }
+
+        .chat-heading {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .assistant-avatar {
+            width: 42px;
+            height: 42px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            border-radius: 14px;
+            background: #edf2ff;
+            color: var(--brand);
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .chat-heading h2 { font-size: 17px; }
+        .chat-heading p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+
+        .chat-body {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 26px clamp(18px, 4vw, 52px);
+            background: linear-gradient(180deg, #fff, #fbfcff);
+            scroll-behavior: smooth;
+        }
+
+        .welcome-card {
+            max-width: 900px;
+            margin: 18px auto 28px;
+            padding: 24px;
+            border: 1px solid #e5eaf5;
+            border-radius: 18px;
+            background: white;
+        }
+
+        .welcome-card h3 {
+            margin: 0 0 7px;
+            font-size: 21px;
+            letter-spacing: -.4px;
+        }
+
+        .welcome-card p { margin: 0; color: var(--muted); font-size: 14px; }
+
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 18px;
+        }
+
+        .suggestion-button {
+            padding: 9px 12px;
+            border: 1px solid #dbe4ff;
+            background: #f7f9ff;
+            color: #3153c8;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .suggestion-button:hover { background: #edf2ff; }
+
+        #chatMessages {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .chat-message {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 26px;
+        }
+
+        .message-avatar {
+            width: 34px;
+            height: 34px;
+            flex-shrink: 0;
+            display: grid;
+            place-items: center;
+            border-radius: 11px;
+            background: #edf2ff;
+            color: var(--brand);
+            font-size: 10px;
+            font-weight: 850;
+        }
+
+        .user-message .message-avatar {
+            background: #e8edf4;
+            color: #475467;
+        }
+
+        .message-content { flex: 1; min-width: 0; }
+
+        .message-heading {
+            margin: 1px 0 7px;
+            color: #344054;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .message-text {
+            color: #253047;
+            font-size: 14px;
+            line-height: 1.85;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .message-tools { display: flex; gap: 7px; margin-top: 8px; }
+
+        .icon-btn {
+            padding: 6px 9px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: #667085;
+            font-size: 11px;
+        }
+
+        .icon-btn:hover { background: #f3f6fc; }
+
+        /* Collapsible evidence: chunks remain available without taking over the chat */
+        .rag-sources {
+            margin-top: 13px;
+            overflow: hidden;
+            border: 1px solid #dfe6f2;
+            border-radius: 12px;
+            background: #f8faff;
+        }
+
+        .rag-sources summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            cursor: pointer;
+            list-style: none;
+            color: #344054;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .rag-sources summary::-webkit-details-marker { display: none; }
+        .source-count { color: var(--muted); font-size: 11px; font-weight: 600; }
+
+        .source-list { display: grid; gap: 9px; padding: 0 10px 10px; }
+
+        .rag-source-card {
+            padding: 12px;
+            border: 1px solid #e3e9f4;
+            border-radius: 10px;
+            background: white;
+        }
+
+        .source-title {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+
+        .source-title strong { color: #3153c8; font-size: 11px; }
+        .source-title span { color: #98a2b3; font-size: 10px; }
+
+        .rag-source-card p {
+            margin: 0;
+            color: #475467;
+            font-size: 12px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .composer-area {
+            padding: 14px clamp(16px, 4vw, 46px) 17px;
+            border-top: 1px solid var(--line);
+            background: white;
+        }
+
+        .composer-wrap { max-width: 900px; margin: 0 auto; }
+
+        .chat-input-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            padding: 8px;
+            border: 1px solid #d7deeb;
+            border-radius: 15px;
+            background: white;
+            box-shadow: 0 4px 16px rgba(16, 24, 40, .045);
+        }
+
+        .chat-input-row:focus-within {
+            border-color: #9cb2ff;
+            box-shadow: 0 0 0 3px rgba(49, 94, 251, .07);
+        }
+
+        #chatQuestion {
+            flex: 1;
+            min-width: 0;
+            max-height: 140px;
+            resize: none;
+            border: 0;
+            outline: none;
+            padding: 9px 8px;
+            background: transparent;
+            color: var(--ink);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        #chatQuestion::placeholder { color: #98a2b3; }
+        #sendChatButton { min-width: 78px; }
+
+        #chatLoading {
+            display: none;
+            margin: 10px 5px 0;
+            color: var(--brand);
+            font-size: 12px;
+        }
+
+        .disclaimer {
+            margin: 10px 4px 0;
+            color: #98a2b3;
+            font-size: 10px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 1000px) {
+            .app-shell { padding: 15px; }
+            .page-grid { grid-template-columns: 1fr; }
+            .sidebar {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                align-items: start;
+            }
+            .chat-panel { height: 76vh; min-height: 650px; }
+        }
+
+        @media (max-width: 620px) {
+            .app-shell { padding: 10px; }
+            .topbar { align-items: flex-start; }
+            .topbar-pill { display: none; }
+            .brand-title { font-size: 17px; }
+            .sidebar { display: flex; }
+            .chat-panel { height: 78vh; min-height: 570px; border-radius: 14px; }
+            .chat-header { padding: 14px; }
+            .chat-body { padding: 17px 12px; }
+            .welcome-card { padding: 17px; margin-top: 5px; }
+            .composer-area { padding: 11px; }
+            .chat-heading p { max-width: 220px; }
+            .message-text { font-size: 13px; }
+            #sendChatButton { min-width: 62px; padding: 10px 12px; }
         }
     </style>
 </head>
 
 <body>
+<div class="app-shell">
 
-<div class="container">
+    <header class="topbar">
+        <div class="brand-lockup">
+            <div class="brand-mark">L</div>
+            <div>
+                <h1 class="brand-title">Legal Intelligence Workspace</h1>
+                <p class="brand-subtitle">Document analysis · AI legal assistant</p>
+            </div>
+        </div>
+        <div class="topbar-pill"><span class="status-dot"></span> Local AI · Ollama</div>
+    </header>
 
-    <h1>Legal Document Analysis</h1>
+    <div class="page-grid">
 
-    <p class="subtitle">
-        Upload a legal document to analyze its potential risks using AI.
-    </p>
+        <aside class="sidebar">
 
-    <div class="upload-section">
+            <section class="panel upload-card">
+                <div class="eyebrow">Workspace</div>
+                <h2>Analyze a document</h2>
+                <p class="muted" style="font-size:13px">
+                    Upload a PDF or text file to review potential risks and ask questions about its contents.
+                </p>
 
-        <input type="file" id="fileInput" accept=".pdf,.txt">
+                <div class="upload-drop">
+                    <div class="upload-icon">↑</div>
+                    <strong>Choose a legal document</strong>
+                    <p>PDF or TXT · Text-based files work best</p>
+                    <input type="file" id="fileInput" accept=".pdf,.txt">
+                    <button class="primary-btn full-width" id="uploadButton" onclick="uploadDocument()">
+                        Upload &amp; analyze
+                    </button>
+                </div>
 
-        <br>
+                <div class="loading" id="loading">Processing document and generating analysis…</div>
 
-        <button onclick="uploadDocument()">
-            Upload & Analyze
-        </button>
+                <div class="document-meta">
+                    <span class="meta-label">Current document</span>
+                    <span class="meta-value" id="documentName">No document selected</span>
+
+                    <span class="meta-label" style="margin-top:12px">Document ID</span>
+                    <span class="meta-value" id="documentId">—</span>
+
+                    <span class="meta-label" style="margin-top:12px">Status</span>
+                    <span class="meta-value" id="documentStatus">Waiting for upload</span>
+                </div>
+
+                <p class="file-note">Uploading the same file may return its existing document ID.</p>
+            </section>
+
+            <section class="panel analysis-card">
+                <div class="eyebrow">AI assessment</div>
+                <h2>Risk overview</h2>
+
+                <div class="risk-row">
+                    <span class="muted" style="font-size:13px">Overall risk</span>
+                    <span id="riskLevel" class="risk-badge">Not analyzed</span>
+                </div>
+
+                <div class="analysis-block">
+                    <h3>Summary</h3>
+                    <p id="summary">Upload a document to view its summary.</p>
+                </div>
+
+                <div class="analysis-block">
+                    <h3>Risk details</h3>
+                    <p id="riskDetails">Potential legal risks will appear here.</p>
+                </div>
+            </section>
+
+        </aside>
+
+        <main>
+            <section class="panel chat-panel" id="chatSection">
+
+                <header class="chat-header">
+                    <div class="chat-heading">
+                        <div class="assistant-avatar">✦</div>
+                        <div>
+                            <h2>Document assistant</h2>
+                            <p>Answers grounded in your uploaded document</p>
+                        </div>
+                    </div>
+
+                    <button class="secondary-btn" onclick="clearChat(true)">New chat</button>
+                </header>
+
+                <div class="chat-body" id="chatBody">
+
+                    <div class="welcome-card" id="welcomeCard">
+                        <h3>What would you like to understand?</h3>
+                        <p>
+                            Ask about clauses, obligations, deadlines, risks, or the court's decision.
+                            Retrieved source excerpts are kept beneath each answer and can be expanded when needed.
+                        </p>
+
+                        <div class="suggestions">
+                            <button class="suggestion-button"
+                                    onclick="askSuggestedQuestion('Summarize this document in simple language.')">
+                                Summarize document
+                            </button>
+
+                            <button class="suggestion-button"
+                                    onclick="askSuggestedQuestion('What are the main legal issues in this document?')">
+                                Main legal issues
+                            </button>
+
+                            <button class="suggestion-button"
+                                    onclick="askSuggestedQuestion('What potential risks are supported by the document?')">
+                                Potential risks
+                            </button>
+
+                            <button class="suggestion-button"
+                                    onclick="askSuggestedQuestion('What is the final decision or conclusion?')">
+                                Final decision
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="chatMessages" aria-live="polite"></div>
+                </div>
+
+                <div class="composer-area">
+                    <div class="composer-wrap">
+                        <div class="chat-input-row">
+                            <textarea
+                                    id="chatQuestion"
+                                    rows="1"
+                                    placeholder="Message your legal document assistant…"
+                                    aria-label="Your question"></textarea>
+
+                            <button class="primary-btn" id="sendChatButton" onclick="sendChatMessage()">
+                                Send ↑
+                            </button>
+                        </div>
+
+                        <p id="chatLoading">Searching relevant excerpts and preparing an answer…</p>
+
+                        <p class="disclaimer">
+                            AI-generated legal information may be incomplete or inaccurate.
+                            Verify important conclusions against the original document and consult a qualified
+                            legal professional for legal advice.
+                        </p>
+                    </div>
+                </div>
+
+            </section>
+        </main>
 
     </div>
-
-    <div class="loading" id="loading">
-        Analyzing document... Please wait.
-    </div>
-
-    <div class="result">
-
-        <h2>Analysis Result</h2>
-
-        <div class="result-box">
-            <p>
-                <span class="label">Document ID:</span>
-                <span id="documentId">-</span>
-            </p>
-
-            <p>
-                <span class="label">Risk Level:</span>
-                <span id="riskLevel">-</span>
-            </p>
-        </div>
-
-        <div class="result-box">
-            <p class="label">Summary</p>
-            <p id="summary">-</p>
-        </div>
-
-        <div class="result-box">
-            <p class="label">Risk Details</p>
-            <p id="riskDetails">-</p>
-        </div>
-
-    </div>
-
 </div>
 
 <script>
+    let activeDocumentId = null;
+    let chatBusy = false;
 
+    // Upload a PDF/TXT and run AI analysis.
     async function uploadDocument() {
-
         const fileInput = document.getElementById("fileInput");
         const loading = document.getElementById("loading");
+        const uploadButton = document.getElementById("uploadButton");
+        const file = fileInput.files[0];
 
-        if (!fileInput.files.length) {
-            alert("Please select a file first.");
+        if (!file) {
+            alert("Please select a PDF or TXT file first.");
+            return;
+        }
+
+        const lowerName = file.name.toLowerCase();
+        if (!lowerName.endsWith(".pdf") && !lowerName.endsWith(".txt")) {
+            alert("Only PDF and TXT files are supported.");
             return;
         }
 
         const formData = new FormData();
+        formData.append("file", file);
 
-        formData.append("file", fileInput.files[0]);
+        uploadButton.disabled = true;
+        loading.style.display = "block";
+        activeDocumentId = null;
+
+        document.getElementById("documentName").textContent = file.name;
+        document.getElementById("documentStatus").textContent = "Uploading and analyzing…";
+        document.getElementById("documentId").textContent = "—";
+        document.getElementById("riskLevel").textContent = "Analyzing";
+        document.getElementById("riskLevel").className = "risk-badge";
+        document.getElementById("summary").textContent = "Analysis in progress…";
+        document.getElementById("riskDetails").textContent = "Analysis in progress…";
+        clearChat(false);
 
         try {
-
-            loading.style.display = "block";
-
-            // Upload document
-            const uploadResponse = await fetch(
-                "/api/documents/upload",
-                {
-                    method: "POST",
-                    body: formData
-                }
-            );
+            const uploadResponse = await fetch("/api/documents/upload", {
+                method: "POST",
+                body: formData
+            });
 
             if (!uploadResponse.ok) {
-                throw new Error("Document upload failed");
+                throw new Error("Document upload failed (" + uploadResponse.status + ").");
             }
 
-            const uploadedDocument =
-                await uploadResponse.json();
+            const uploadedDocument = await uploadResponse.json();
+            activeDocumentId = uploadedDocument.id;
 
-            document.getElementById("documentId").textContent =
-                uploadedDocument.id;
+            document.getElementById("documentId").textContent = String(uploadedDocument.id);
+            if (uploadedDocument.fileName) {
+                document.getElementById("documentName").textContent = uploadedDocument.fileName;
+            }
+            document.getElementById("documentStatus").textContent = "Uploaded · analyzing";
 
-
-            // AI analysis
             const analysisResponse = await fetch(
-                "/api/analysis/ai-analyze/" +
-                uploadedDocument.id,
-                {
-                    method: "POST"
-                }
+                "/api/analysis/ai-analyze/" + uploadedDocument.id,
+                { method: "POST" }
             );
 
             if (!analysisResponse.ok) {
-                throw new Error("Document analysis failed");
+                document.getElementById("documentStatus").textContent = "Uploaded · analysis failed";
+                throw new Error(
+                    "Document uploaded, but AI analysis failed (" + analysisResponse.status + ")."
+                );
             }
 
-            const analysis =
-                await analysisResponse.json();
+            const analysis = await analysisResponse.json();
+            const level = (analysis.riskLevel || "Not available").toUpperCase();
+            const risk = document.getElementById("riskLevel");
 
-
-            // Display result
-            document.getElementById("riskLevel").textContent =
-                analysis.riskLevel;
+            risk.textContent = level;
+            risk.className = "risk-badge " +
+                (level === "LOW" ? "risk-low" :
+                    level === "MEDIUM" ? "risk-medium" :
+                        level === "HIGH" ? "risk-high" : "");
 
             document.getElementById("summary").textContent =
-                analysis.summary;
-
+                analysis.summary || "No summary returned.";
             document.getElementById("riskDetails").textContent =
-                analysis.riskDetails;
+                analysis.riskDetails || "No risk details returned.";
+            document.getElementById("documentStatus").textContent = "Ready to chat";
+
+            document.getElementById("chatSection").scrollIntoView({
+                behavior: "smooth",
+                block: "nearest"
+            });
+            document.getElementById("welcomeCard").style.display = "block";
+            document.getElementById("chatQuestion").focus();
 
         } catch (error) {
-
-            console.error(error);
-
-            alert(
-                "Something went wrong: " +
-                error.message
-            );
+            console.error("Upload/analysis error:", error);
+            document.getElementById("documentStatus").textContent =
+                activeDocumentId ? "Uploaded · check analysis" : "Upload failed";
+            alert("Something went wrong: " + error.message);
 
         } finally {
-
             loading.style.display = "none";
+            uploadButton.disabled = false;
         }
     }
 
+    function scrollChatToBottom() {
+        const body = document.getElementById("chatBody");
+        body.scrollTop = body.scrollHeight;
+    }
+
+    // Create messages with textContent to safely display document text.
+    function addChatMessage(sender, message, isUser, sources) {
+        const messages = document.getElementById("chatMessages");
+        const article = document.createElement("article");
+        article.className = "chat-message " + (isUser ? "user-message" : "ai-message");
+
+        const avatar = document.createElement("div");
+        avatar.className = "message-avatar";
+        avatar.textContent = isUser ? "YOU" : "AI";
+
+        const content = document.createElement("div");
+        content.className = "message-content";
+
+        const heading = document.createElement("div");
+        heading.className = "message-heading";
+        heading.textContent = sender;
+
+        const text = document.createElement("div");
+        text.className = "message-text";
+        text.textContent = message;
+
+        content.append(heading, text);
+
+        if (!isUser) {
+            const tools = document.createElement("div");
+            tools.className = "message-tools";
+
+            const copyButton = document.createElement("button");
+            copyButton.className = "icon-btn";
+            copyButton.type = "button";
+            copyButton.textContent = "Copy answer";
+
+            copyButton.addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(message);
+                    copyButton.textContent = "Copied";
+                    setTimeout(() => copyButton.textContent = "Copy answer", 1300);
+                } catch (error) {
+                    copyButton.textContent = "Copy unavailable";
+                }
+            });
+
+            tools.appendChild(copyButton);
+            content.appendChild(tools);
+
+            if (Array.isArray(sources) && sources.length > 0) {
+                const details = document.createElement("details");
+                details.className = "rag-sources";
+
+                const summary = document.createElement("summary");
+                const label = document.createElement("span");
+                label.textContent = "Evidence from your document";
+
+                const count = document.createElement("span");
+                count.className = "source-count";
+                count.textContent = sources.length + " retrieved chunks · expand to view";
+
+                summary.append(label, count);
+                details.appendChild(summary);
+
+                const list = document.createElement("div");
+                list.className = "source-list";
+
+                sources.forEach(source => {
+                    const card = document.createElement("div");
+                    card.className = "rag-source-card";
+
+                    const titleRow = document.createElement("div");
+                    titleRow.className = "source-title";
+
+                    const title = document.createElement("strong");
+                    const index = source.chunkIndex;
+                    title.textContent = "Chunk " +
+                        (Number.isInteger(index) ? index + 1 : (index ?? "Unknown"));
+
+                    const tag = document.createElement("span");
+                    tag.textContent = "Retrieved source";
+
+                    titleRow.append(title, tag);
+
+                    const excerpt = document.createElement("p");
+                    excerpt.textContent = source.content || "No source text returned.";
+
+                    card.append(titleRow, excerpt);
+                    list.appendChild(card);
+                });
+
+                details.appendChild(list);
+                content.appendChild(details);
+            }
+        }
+
+        article.append(avatar, content);
+        messages.appendChild(article);
+        scrollChatToBottom();
+    }
+
+    function clearChat(showWelcome = true) {
+        document.getElementById("chatMessages").replaceChildren();
+        document.getElementById("welcomeCard").style.display =
+            showWelcome ? "block" : "none";
+
+        if (showWelcome && activeDocumentId) {
+            document.getElementById("chatQuestion").focus();
+        }
+    }
+
+    function askSuggestedQuestion(question) {
+        document.getElementById("chatQuestion").value = question;
+        sendChatMessage();
+    }
+
+    // Send a question to the existing Spring Boot API.
+    async function sendChatMessage() {
+        if (chatBusy) return;
+
+        const input = document.getElementById("chatQuestion");
+        const loading = document.getElementById("chatLoading");
+        const sendButton = document.getElementById("sendChatButton");
+        const question = input.value.trim();
+
+        if (!activeDocumentId) {
+            alert("Please upload and analyze a document first.");
+            return;
+        }
+
+        if (!question) {
+            alert("Please enter a question.");
+            return;
+        }
+
+        document.getElementById("welcomeCard").style.display = "none";
+        addChatMessage("You", question, true);
+
+        input.value = "";
+        input.style.height = "auto";
+        chatBusy = true;
+        loading.style.display = "block";
+        sendButton.disabled = true;
+
+        try {
+            const response = await fetch("/api/chat/" + activeDocumentId, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: question })
+            });
+
+            if (!response.ok) {
+                let errorMessage = "Chat request failed (" + response.status + ").";
+
+                try {
+                    const errorData = await response.json();
+                    if (errorData.message) errorMessage = errorData.message;
+                } catch (ignored) {}
+
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+
+            addChatMessage(
+                "AI Assistant",
+                data.answer || "The AI returned an empty answer.",
+                false,
+                data.sources
+            );
+
+        } catch (error) {
+            console.error("Chat error:", error);
+            addChatMessage(
+                "AI Assistant",
+                "Sorry, I couldn't answer your question. " + error.message,
+                false
+            );
+
+        } finally {
+            loading.style.display = "none";
+            sendButton.disabled = false;
+            chatBusy = false;
+            input.focus();
+        }
+    }
+
+    const questionBox = document.getElementById("chatQuestion");
+
+    questionBox.addEventListener("keydown", event => {
+        if (event.key === "Enter" && !event.shiftKey) {
+            event.preventDefault();
+            sendChatMessage();
+        }
+    });
+
+    questionBox.addEventListener("input", function() {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 140) + "px";
+    });
 </script>
 
 </body>
